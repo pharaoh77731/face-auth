@@ -1,0 +1,24 @@
+# Sensitive — NEVER commit these
+data/.key
+data/faceauth.db
+
+# Logs
+logs/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+venv/
+env/
+.env
+
+# Jupyter (old version kept for reference only)
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
