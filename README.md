@@ -1,46 +1,102 @@
-# Face Authentication System
+# 🔐 Face Authentication System
 
-> A biometric identity verification system using real-time facial recognition — built to explore the security properties, attack surface, and practical tradeoffs of face-based authentication.
+> A biometric identity verification system using deep learning — built with a security-first mindset.
+
+![Python](https://img.shields.io/badge/Python-3.8%2B-blue?style=flat-square&logo=python)
+![OpenCV](https://img.shields.io/badge/OpenCV-Computer%20Vision-green?style=flat-square&logo=opencv)
+![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
+![Status](https://img.shields.io/badge/Status-Active-brightgreen?style=flat-square)
 
 ---
 
 ## Overview
 
-This project implements a face-based authentication pipeline using computer vision and deep learning. It covers the full lifecycle of a biometric auth system: **enrollment**, **verification**, and **access decision** — while analysing the security implications at each stage.
+The Face Authentication System is a biometric access control tool that verifies individual identity by analysing facial features in real time. It demonstrates the practical application of computer vision and machine learning in cybersecurity contexts such as physical access control, attendance verification, and multi-factor authentication (MFA) pipelines.
 
-The system was built not just as a working prototype, but as a hands-on study of how biometric authentication works, where it can fail, and how its weaknesses map to real-world threat models.
+This project was built with an awareness of the security trade-offs inherent in biometric systems — including spoofing risks and data-at-rest vulnerabilities — making it a practical study in both implementation and threat modelling.
 
 ---
 
 ## Features
 
-- **Real-time face detection** via webcam using OpenCV
-- **128-dimensional face encoding** using the `face_recognition` library (based on dlib's ResNet model)
-- **CSV-based identity store** for enrollment records and face embeddings
-- **Threshold-based access control** — configurable tolerance to tune the FAR/FRR tradeoff
-- **Enrollment & verification workflow** — register new users, then authenticate against stored encodings
+- **Real-time face detection** using OpenCV's camera feed
+- **Deep learning–based facial encoding** via the `face_recognition` library (dlib backend)
+- **Enrolment workflow** — register new individuals with their facial embeddings
+- **Verification workflow** — compare live face data against stored encodings
+- **Structured data storage** — facial encodings stored with associated metadata
 
 ---
 
-## How It Works
+## Security Design Considerations
 
+> This section documents the threat model and known limitations — critical for any security-aware deployment.
+
+### Known Attack Vectors
+
+| Attack | Description | Mitigation Status |
+|--------|-------------|-------------------|
+| **Photo Spoofing** | Static image used to fool the camera | ⚠️ Partially mitigated — liveness detection planned |
+| **Replay Attack** | Recorded video replayed at camera | ⚠️ Not yet mitigated |
+| **Database Exfiltration** | Facial encodings stolen from storage | 🔲 Encryption of stored encodings planned |
+| **Adversarial Input** | Crafted images designed to fool the model | 🔲 Out of scope for current version |
+
+### Current Limitations
+
+- Facial encodings are stored in plaintext — **not suitable for production** without encryption at rest
+- No liveness detection — the system can potentially be fooled by a high-quality photograph
+- Single-factor — intended as one layer in a broader MFA architecture, not standalone authentication
+
+### Planned Hardening
+
+- [ ] AES-256 encryption of stored facial embeddings
+- [ ] Eye Aspect Ratio (EAR) based blink detection for liveness
+- [ ] Rate limiting on failed authentication attempts
+- [ ] Audit logging of all authentication events
+
+---
+
+## Tech Stack
+
+| Component | Technology |
+|-----------|------------|
+| Language | Python 3.8+ |
+| Computer Vision | OpenCV |
+| Face Analysis | face_recognition (dlib) |
+| Numerical Computing | NumPy |
+| Data Handling | Pandas |
+| Visualisation | Matplotlib |
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+```bash
+pip install opencv-python face_recognition numpy pandas matplotlib
 ```
-┌─────────────┐     ┌──────────────────┐     ┌───────────────────┐
-│  Webcam     │────▶│  Face Detection  │────▶│  Face Encoding    │
-│  Input      │     │  (OpenCV + HOG)  │     │  (128-d vector)   │
-└─────────────┘     └──────────────────┘     └────────┬──────────┘
-                                                       │
-                              ┌────────────────────────▼──────────┐
-                              │    Compare against CSV database    │
-                              │    using Euclidean distance        │
-                              └────────────────────────┬──────────┘
-                                                       │
-                              ┌────────────────────────▼──────────┐
-                              │  Distance < Threshold?            │
-                              │  YES → ACCESS GRANTED             │
-                              │  NO  → ACCESS DENIED              │
-                              └───────────────────────────────────┘
+
+> **Note:** `face_recognition` requires `dlib`, which may need CMake and a C++ compiler. See [dlib installation guide](http://dlib.net/compile.html).
+
+### Installation
+
+```bash
+git clone https://github.com/pharaoh77731/face-auth.git
+cd face-auth
+pip install -r requirements.txt
 ```
+
+### Usage
+
+Open `face-auth.ipynb` in Jupyter Notebook or VS Code:
+
+```bash
+jupyter notebook face-auth.ipynb
+```
+
+**Step 1 — Enrolment:** Run the enrolment cells to capture and store a user's facial encoding.
+
+**Step 2 — Authentication:** Run the verification cells to compare a live face against the database.
 
 ---
 
@@ -48,88 +104,60 @@ The system was built not just as a working prototype, but as a hands-on study of
 
 ```
 face-auth/
-├── face-auth.ipynb       # Main notebook: enrollment, verification, analysis
-├── requirements.txt      # All dependencies with pinned versions
-├── SECURITY.md           # Threat model, known vulnerabilities, mitigations
-├── README.md             # This file
-└── LICENSE               # MIT License
+├── face-auth.ipynb      # Main notebook: enrolment & authentication pipeline
+├── README.md            # Project documentation
+└── LICENSE              # MIT License
 ```
 
 ---
 
-## Setup & Installation
+## Cybersecurity Context
 
-**Prerequisites:** Python 3.8+, a working webcam
+Biometric authentication is increasingly used across sectors — from border control to mobile banking. However, biometric systems introduce unique risks compared to password-based auth:
 
-```bash
-# Clone the repository
-git clone https://github.com/pharaoh77731/face-auth.git
-cd face-auth
+- **Biometrics are not revocable** — if a face encoding is leaked, you cannot change your face
+- **False Acceptance Rate (FAR) vs False Rejection Rate (FRR)** — tuning the matching threshold is a core security trade-off
+- **Privacy regulations** — biometric data is classified as sensitive personal data under GDPR and India's DPDP Act
 
-# Install dependencies
-pip install -r requirements.txt
-
-# Launch the notebook
-jupyter notebook face-auth.ipynb
-```
-
-> **Note:** `face_recognition` requires `cmake` and `dlib` to build. On Ubuntu/Debian: `sudo apt install cmake`. On Windows, use a pre-built wheel or WSL.
+This project explores these trade-offs in a controlled, educational environment.
 
 ---
 
-## Usage
+## Roadmap
 
-**Step 1 — Enroll a user**
-Run the enrollment cell. The system captures your face via webcam, computes a 128-d encoding, and saves it to the CSV database with a username label.
-
-**Step 2 — Authenticate**
-Run the verification cell. The system captures a live frame, encodes it, and computes the Euclidean distance against all enrolled faces. If the closest match is within the configured tolerance threshold, access is granted.
-
-**Step 3 — Adjust the threshold**
-The default tolerance is `0.6`. Lower values (e.g. `0.45`) reduce false acceptances at the cost of more false rejections. See `SECURITY.md` for analysis.
-
----
-
-## Tech Stack
-
-| Library | Version | Purpose |
-|---|---|---|
-| `face_recognition` | 1.3.0 | Face encoding & comparison |
-| `opencv-python` | 4.9.0.80 | Webcam capture, frame processing |
-| `numpy` | 1.26.4 | Numerical operations on encodings |
-| `pandas` | 2.2.1 | CSV database management |
-| `matplotlib` | 3.8.3 | Visualisation of encodings & results |
-| `jupyter` | 1.0.0 | Notebook runtime |
+- [x] Core enrolment and verification pipeline
+- [x] Real-time camera integration
+- [ ] Encrypted storage backend (SQLite + AES)
+- [ ] Liveness detection (blink-based EAR)
+- [ ] CLI interface for non-notebook usage
+- [ ] Docker containerisation
+- [ ] REST API wrapper for integration into larger auth systems
 
 ---
 
-## Security Analysis
+## Contributing
 
-See [`SECURITY.md`](./SECURITY.md) for a detailed breakdown of:
-- Threat model and attack surface
-- Known vulnerabilities (photo spoofing, adversarial inputs, replay attacks)
-- FAR / FRR tradeoff analysis
-- Recommended mitigations
-
----
-
-## Limitations
-
-This is a **prototype for educational and research purposes**. It is not production-ready due to:
-- No liveness detection (vulnerable to photo/video spoofing)
-- Face encodings stored in plaintext CSV (no encryption at rest)
-- No rate limiting on authentication attempts
-- Single-factor — not suitable as a standalone auth mechanism for sensitive systems
+Pull requests are welcome. For major changes, please open an issue first to discuss what you'd like to change.
 
 ---
 
 ## Author
 
 **Bhupendra Singh**
-[github.com/pharaoh77731](https://github.com/pharaoh77731)
+[GitHub](https://github.com/pharaoh77731)
 
 ---
 
 ## License
 
-This project is licensed under the [MIT License](./LICENSE).
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+## Acknowledgements
+
+- [OpenCV](https://opencv.org/) — Computer vision library
+- [face_recognition](https://pypi.org/project/face-recognition/) — Facial analysis built on dlib
+- [NumPy](https://numpy.org/) — Numerical computing
+- [Pandas](https://pandas.pydata.org/) — Data analysis
+- [Matplotlib](https://matplotlib.org/) — Data visualisation
